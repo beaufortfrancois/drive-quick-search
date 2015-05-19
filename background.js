@@ -8,6 +8,11 @@ var oauth = ChromeExOAuth.initBackgroundPage({
   'app_name':'GoogleDriveQuickSearch'
 });
 
+
+var gdocs = new GDocs();
+
+
+
 var API_KEY = 'AIzaSyBk1BMpp_cQ-AUkHDKkQu-oyk9KX0IpRFs';
 var MAX_RESULTS = 1000;
 var REFRESH_INTERVAL = 10; // minutes
@@ -105,6 +110,30 @@ function retrieveItemsFromApi() {
     chrome.storage.local.set({driveChangeId: changeId});
   });
 }
+
+
+retrieveDriveItemsOauth2 = function(retry) {
+
+  if (gdocs.accessToken) {
+    var config = {
+      params: {'alt': 'json'},
+      headers: {
+        'Authorization': 'Bearer ' + gdocs.accessToken
+      }
+    };
+
+    var p = fetch(gdocs.files, config)
+      .then(successCallbackWithFsCaching)
+      .catch(function(data, status, headers, config) {
+        if (p.Response.status == 401 && retry) {
+          gdocs.removeCachedAuthToken(
+              gdocs.auth.bind(gdocs, true, 
+                  retrieveDriveItemsOauth2(false)));
+        }
+      });
+  }
+};
+
 
 function retrieveDriveItems(items, nextPageToken, callback) {
   var url = 'https://www.googleapis.com/drive/v2/files';
