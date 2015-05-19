@@ -29,7 +29,11 @@ function GDocs(selector) {
     return SCOPE_;
   });
 
-  this.__defineGetter__('DOCLIST_FEED', function() {
+  this.__defineGetter__('changes', function() {
+    return SCOPE_;
+  });
+
+  this.__defineGetter__('files', function() {
     return SCOPE_ + 'files';
   });
 
